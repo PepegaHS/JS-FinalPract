@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedditBubble: Симулятор Алгоритмов Рекомендаций</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="reddit-dark">
+    <!-- Контейнер веб-приложения -->
+    <div class="app-container">
+        <!-- Навигационная панель (Шапка сайта) -->
+        <header class="site-header">
+            <div class="header-left">
+                <div class="site-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11" fill="#ff4500"/>
+                        <path d="M12 5.5c-3.59 0-6.5 2.24-6.5 5s2.91 5 6.5 5 6.5-2.24 6.5-5-2.91-5-6.5-5zm-3 5.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" fill="white"/>
+                        <path d="M12 14c-1.5 0-2.5-.5-2.8-.8a.4.4 0 0 1 .6-.6c.2.2.9.6 2.2.6s2-.4 2.2-.6a.4.4 0 0 1 .6.6c-.3.3-1.3.8-2.8.8z" fill="white"/>
+                    </svg>
+                </div>
+                <span class="site-title">reddit <span class="site-title-accent">bubble</span></span>
+            </div>
+            <div class="header-center">
+                <div class="search-box">
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" placeholder="Поиск в reddit bubble..." id="global-search" disabled>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="site-subtitle">Симулятор Рекомендаций</span>
+            </div>
+        </header>
+
+
+        <!-- Главный экран приложения -->
+        <main class="app-body">
+            
+            <!-- Левая панель: Статистика пузыря и профиль пользователя -->
+            <section class="panel left-panel">
+                <div class="panel-header">
+                    <h2>Профиль пользователя</h2>
+                </div>
+                
+                <!-- Переключатель пользователей -->
+                <div class="user-selector-container">
+                    <div class="win-segmented-control">
+                        <button class="segment-btn active" id="btn-user-a">Пользователь А</button>
+                        <button class="segment-btn" id="btn-user-b">Пользователь Б</button>
+                    </div>
+                </div>
+
+                <div class="scrollable-panel-content">
+                    <!-- Блок: Уровень изоляции (Пузырь) -->
+                    <div class="card metric-card">
+                        <div class="card-title">Индекс пузыря (Изоляция)</div>
+                        <div class="gauge-container">
+                            <div class="bubble-gauge">
+                                <svg class="gauge-svg" viewBox="0 0 100 100">
+                                    <circle class="gauge-bg" cx="50" cy="50" r="40" />
+                                    <circle class="gauge-value" id="bubble-gauge-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                                </svg>
+                                <div class="gauge-text">
+                                    <span class="gauge-percentage" id="bubble-percentage">0%</span>
+                                    <span class="gauge-label" id="bubble-status">Разнообразно</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-desc">Показывает, насколько сильно алгоритм фильтрует контент, скрывая альтернативные точки зрения.</p>
+                    </div>
+
+                    <!-- Блок: Идеологический спектр -->
+                    <div class="card spectrum-card">
+                        <div class="card-title">Идеологический спектр</div>
+                        <div class="spectrum-meter">
+                            <div class="spectrum-track"></div>
+                            <div class="spectrum-marker" id="spectrum-marker" style="left: 50%;"></div>
+                        </div>
+                        <div class="spectrum-labels">
+                            <span>Демократы (Либералы)</span>
+                            <span>Посередине</span>
+                            <span>Республиканцы (Консерваторы)</span>
+                        </div>
+                        <div class="leaning-value-label">Смещение: <span id="leaning-val">0.0</span></div>
+                    </div>
+
+                    <!-- Блок: Интересы к темам -->
+                    <div class="card interests-card">
+                        <div class="card-header-with-action">
+                            <div class="card-title">Интересы к темам</div>
+                            <button class="win-btn-text" id="reset-interests-btn">Сбросить</button>
+                        </div>
+                        <div class="interests-list" id="interests-progress-list">
+                            <!-- Заполняется динамически -->
+                        </div>
+                    </div>
+
+                    <!-- Действия с пузырем -->
+                    <div class="profile-actions">
+                        <button class="win-btn win-btn-accent" id="burst-bubble-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                            </svg>
+                            Лопнуть информационный пузырь!
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Центральная панель: Новостная лента (динамическая разметка) -->
+            <section class="panel feed-panel" id="feed-panel-container">
+                <!-- Одиночный режим (по умолчанию) -->
+                <div class="single-feed-container" id="single-feed">
+                    <div class="panel-header feed-header">
+                        <div class="feed-title-wrapper">
+                            <h2>Новостная лента</h2>
+                            <span class="badge" id="active-user-badge">Пользователь А</span>
+                        </div>
+                        <button class="win-btn-secondary" id="refresh-feed-btn">
+                            🔄 Обновить
+                        </button>
+                    </div>
+                    <div class="feed-articles" id="articles-container-a">
+                        <!-- Сюда вставляются карточки новостей -->
+                        <div class="loading-state">Загрузка ленты...</div>
+                    </div>
+                </div>
+
+                <!-- Режим сравнения (скрыт по умолчанию) -->
+                <div class="compare-feed-container hidden" id="compare-feed">
+                    <div class="compare-column">
+                        <div class="panel-header feed-header">
+                            <div class="feed-title-wrapper">
+                                <h2>Лента Пользователя А</h2>
+                                <span class="badge badge-left">Демократ / Либерал</span>
+                            </div>
+                        </div>
+                        <div class="feed-articles" id="articles-container-compare-a">
+                            <!-- Карточки пользователя А -->
+                        </div>
+                    </div>
+                    <div class="compare-column separator">
+                        <div class="panel-header feed-header">
+                            <div class="feed-title-wrapper">
+                                <h2>Лента Пользователя Б</h2>
+                                <span class="badge badge-right">Республиканец / Консерватор</span>
+                            </div>
+                        </div>
+                        <div class="feed-articles" id="articles-container-compare-b">
+                            <!-- Карточки пользователя Б -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Правая панель: Настройки алгоритма и консоль логов -->
+            <section class="panel right-panel">
+                <div class="panel-header">
+                    <h2>Панель управления алгоритмами</h2>
+                </div>
+
+                <div class="scrollable-panel-content">
+                    <!-- Выбор алгоритма -->
+                    <div class="card algo-card">
+                        <div class="card-title">Используемый алгоритм</div>
+                        <div class="win-radio-group">
+                            <label class="win-radio">
+                                <input type="radio" name="recommendation-algorithm" value="content-based" checked>
+                                <span class="radio-mark"></span>
+                                <div class="radio-label-wrapper">
+                                    <span class="radio-label-title">Фильтрация по интересам</span>
+                                    <span class="radio-label-desc">Content-Based. Рекомендует темы на основе ваших лайков и истории кликов.</span>
+                                </div>
+                            </label>
+                            
+                            <label class="win-radio">
+                                <input type="radio" name="recommendation-algorithm" value="engagement">
+                                <span class="radio-mark"></span>
+                                <div class="radio-label-wrapper">
+                                    <span class="radio-label-title">Engagement Optimizer</span>
+                                    <span class="radio-label-desc">Максимизация кликов. Приоритет отдается кликбейту и сенсационным новостям.</span>
+                                </div>
+                            </label>
+
+                            <label class="win-radio">
+                                <input type="radio" name="recommendation-algorithm" value="radicalizer">
+                                <span class="radio-mark"></span>
+                                <div class="radio-label-wrapper">
+                                    <span class="radio-label-title">Радикализатор взглядов</span>
+                                    <span class="radio-label-desc">Экстремальные взгляды. Скрытые алгоритмы плавно сдвигают ленту к радикальным мнениям.</span>
+                                </div>
+                            </label>
+
+                            <label class="win-radio">
+                                <input type="radio" name="recommendation-algorithm" value="bubble-buster">
+                                <span class="radio-mark"></span>
+                                <div class="radio-label-wrapper">
+                                    <span class="radio-label-title">Разрушитель пузырей</span>
+                                    <span class="radio-label-desc">Bubble Buster. Показывает противоположные взгляды и темы, которые вы обычно игнорируете.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Сила фильтрации (ползунок) -->
+                    <div class="card strength-card">
+                        <div class="card-header-with-action">
+                            <div class="card-title">Сила алгоритма (Изоляция)</div>
+                            <span class="slider-value" id="strength-val">50%</span>
+                        </div>
+                        <div class="win-slider-container">
+                            <input type="range" min="0" max="100" value="50" class="win-slider" id="algorithm-strength">
+                        </div>
+                        <p class="card-desc">При 0% лента случайна. При 100% алгоритм полностью изолирует вас от альтернативного контента.</p>
+                    </div>
+
+                    <!-- Режимы симуляции -->
+                    <div class="card sim-modes-card">
+                        <div class="card-title">Режимы симуляции</div>
+                        
+                        <label class="win-toggle">
+                            <input type="checkbox" id="toggle-compare-mode">
+                            <span class="toggle-switch"></span>
+                            <div class="toggle-label-wrapper">
+                                <span class="toggle-title">Сравнить двух пользователей</span>
+                                <span class="toggle-desc">Показывает side-by-side сравнение двух разных лент в реальном времени.</span>
+                            </div>
+                        </label>
+
+                        <div class="simulation-actions">
+                            <button class="win-btn win-btn-secondary w-100" id="trigger-event-btn">
+                                ⚡ Генерация случайного события
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Скрытые алгоритмы (Лог работы рекомендаций) -->
+                    <div class="card log-card">
+                        <div class="card-title">Телеметрия рекомендательного движка</div>
+                        <div class="terminal-log" id="console-logs">
+                            <div class="log-line text-muted">[SYSTEM] Инициализация симулятора...</div>
+                            <div class="log-line text-info">[ALGO] Загружена база данных новостей.</div>
+                            <div class="log-line">[SYSTEM] Рекомендательная система готова. Начните лайкать статьи.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Модальное окно: Случайное событие -->
+    <div class="win-modal-overlay hidden" id="event-modal">
+        <div class="win-modal">
+            <div class="win-modal-header">
+                <span class="modal-title" id="event-title">Важное событие</span>
+                <button class="modal-close-btn" id="event-modal-close">❌</button>
+            </div>
+            <div class="win-modal-body">
+                <p class="event-desc" id="event-description">Произошло событие глобального масштаба!</p>
+                
+                <div class="event-bubble-comparison">
+                    <div class="bubble-reaction-box">
+                        <div class="reaction-header">Как это увидит Пользователь А (Демократ)</div>
+                        <div class="event-headline headline-skeptic" id="reaction-skeptic">Шок: реформы приведут к кризису!</div>
+                    </div>
+                    <div class="bubble-reaction-box">
+                        <div class="reaction-header">Как это увидит Пользователь Б (Республиканец)</div>
+                        <div class="event-headline headline-optimist" id="reaction-optimist">Прорыв: реформы откроют золотой век!</div>
+                    </div>
+                </div>
+                
+                <p class="modal-notice">Этот пример показывает, как одна и та же новость фильтруется и искажается для людей, находящихся в разных информационных пузырях.</p>
+            </div>
+            <div class="win-modal-footer">
+                <button class="win-btn win-btn-accent" id="event-modal-ok">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="posts.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
